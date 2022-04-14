@@ -15,11 +15,12 @@ else
 LAUNCHER="${PROJECT_LOC}/launcher --dumpstats --dumpstats_period ${STATS_PERIOD}"
 fi
 
-PERF="/home/yanzi/projects/repos/linux/tools/perf/perf"
+PERF="/ssd1/kevin/nimble/nimble_kernel_5_6/tools/perf/perf"
 PERF_EVENTS="cycles,instructions,itlb_misses.miss_causes_a_walk,itlb_misses.walk_duration,dtlb_load_misses.miss_causes_a_walk,dtlb_load_misses.walk_duration,dtlb_store_misses.miss_causes_a_walk,dtlb_store_misses.walk_duration"
 #PERF_EVENTS="cycles,instructions,iTLB-loads,iTLB-load-misses,itlb_misses.miss_causes_a_walk,itlb_misses.walk_duration,dTLB-loads,dTLB-load-misses,dtlb_load_misses.miss_causes_a_walk,dtlb_load_misses.walk_duration,dTLB-stores,dTLB-store-misses,dtlb_store_misses.miss_causes_a_walk,dtlb_store_misses.walk_duration"
 
-FLAMEGRAPH_LOC="/home/yanzi/tools/FlameGraph"
+# Disable flamegraph for now
+#FLAMEGRAPH_LOC="/home/yanzi/tools/FlameGraph"
 
 PERF_CMD="${PERF} stat -e ${PERF_EVENTS}"
 
@@ -106,9 +107,9 @@ if [[ "x${PERF_STATS}" == "xyes" ]]; then
 	fi
 fi
 
-if [[ "x${PERF_FLAMEGRAPH}" == "xyes" ]]; then
-	LAUNCHER="${LAUNCHER} --perf_loc ${PERF} --perf_flamegraph"
-fi
+#if [[ "x${PERF_FLAMEGRAPH}" == "xyes" ]]; then
+#	LAUNCHER="${LAUNCHER} --perf_loc ${PERF} --perf_flamegraph"
+#fi
 
 
 FAST_NUMA_NODE_CPUS=`numactl -H| grep "node ${FAST_NUMA_NODE} cpus" | cut -d" " -f 4-`
@@ -122,10 +123,12 @@ fi
 sync
 echo 3 | sudo tee /proc/sys/vm/drop_caches
 
-if [[ "x${SCHEME}" != "xall-local-access" ]] && [[ "x${MEMHOG_THREADS}" != "x0" ]]; then
-sudo insmod /home/yanzi/tools/kernel-mod-ubench/pref-test.ko nthreads=${MEMHOG_THREADS}
-trap "sudo rmmod -f pref_test;  exit" INT
-fi
+# This seems to be related to memhog, which is used to slow down one of the NUMA nodes
+# in order to simulate lower tier memory. We do not need this since we have NVM.
+#if [[ "x${SCHEME}" != "xall-local-access" ]] && [[ "x${MEMHOG_THREADS}" != "x0" ]]; then
+#sudo insmod /home/yanzi/tools/kernel-mod-ubench/pref-test.ko nthreads=${MEMHOG_THREADS}
+#trap "sudo rmmod -f pref_test;  exit" INT
+#fi
 
 if [[ "x${SCHEME}" != "xall-local-access" ]] && [[ "x${SCHEME}" != "xall-remote-access" ]] ; then
 	if [[ "x${PREFER_FAST_NODE}" == "xyes" ]]; then
@@ -251,12 +254,12 @@ cat /proc/vmstat >> ${CUR_PWD}/${RES_FOLDER}/${BENCH}_vmstat
 		mv ${STATS_FILE} ${CUR_PWD}/${RES_FOLDER}/${BENCH}_${STATS_FILE}
 	done
 
-	if [[ "x${PERF_FLAMEGRAPH}" == "xyes" ]]; then
-		perf script -i perf_results | ${FLAMEGRAPH_LOC}/stackcollapse-perf.pl > out.perf-folded
-		${FLAMEGRAPH_LOC}/flamegraph.pl out.perf-folded > flamegraph.svg
-		mv perf_results ${CUR_PWD}/${RES_FOLDER}/${BENCH}_perf_results
-		mv flamegraph.svg ${CUR_PWD}/${RES_FOLDER}/${BENCH}_flamegraph.svg
-	fi
+	#if [[ "x${PERF_FLAMEGRAPH}" == "xyes" ]]; then
+	#	perf script -i perf_results | ${FLAMEGRAPH_LOC}/stackcollapse-perf.pl > out.perf-folded
+	#	${FLAMEGRAPH_LOC}/flamegraph.pl out.perf-folded > flamegraph.svg
+	#	mv perf_results ${CUR_PWD}/${RES_FOLDER}/${BENCH}_perf_results
+	#	mv flamegraph.svg ${CUR_PWD}/${RES_FOLDER}/${BENCH}_flamegraph.svg
+	#fi
 	
 	if [ -f perf_results ]; then
 		mv perf_results ${CUR_PWD}/${RES_FOLDER}/${BENCH}_perf_results
@@ -280,10 +283,10 @@ if [[ ${BENCH} == "cifar10" ]]; then
 fi
 
 
-if [[ "x${SCHEME}" != "xall-local-access" ]] && [[ "x${MEMHOG_THREADS}" != "x0" ]]; then
-sleep 5
-sudo rmmod pref_test
-fi
+#if [[ "x${SCHEME}" != "xall-local-access" ]] && [[ "x${MEMHOG_THREADS}" != "x0" ]]; then
+#sleep 5
+#sudo rmmod pref_test
+#fi
 
 date
 
