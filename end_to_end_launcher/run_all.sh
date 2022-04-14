@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export FAST_NODE=1
-export SLOW_NODE=0
+export FAST_NODE=0
+export SLOW_NODE=1  # NVM is configured as NUMA node 2 on this machine
 export STATS_PERIOD=5
 export MOVE_HOT_AND_COLD_PAGES=no
 export SHRINK_PAGE_LISTS=yes
@@ -49,7 +49,7 @@ BENCHMARK_LIST="graph500-omp"
 #PAGE_REPLACEMENT_SCHEMES="opt-migration exchange-pages"
 #PAGE_REPLACEMENT_SCHEMES="concur-only-opt-migration concur-only-exchange-pages"
 #PAGE_REPLACEMENT_SCHEMES="exchange-pages"
-#PAGE_REPLACEMENT_SCHEMES="opt-migration"
+PAGE_REPLACEMENT_SCHEMES="opt-migration"
 
 #MEM_SIZE_LIST="unlimited"
 MEM_SIZE_LIST=$(seq 4 4 28)

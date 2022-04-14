@@ -7,7 +7,7 @@ else
 	export CPUS=1
 fi
 
-PROJECT_LOC="/home/yanzi/projects/thp_migration/two-level-memory"
+PROJECT_LOC="/ssd1/kevin/nimble/nimble_page_management_userspace/end_to_end_launcher/"
 
 if [[ "x${BENCH}" == "xdata-caching" || "x${BENCH}" == "xmemcached-user"  ]]; then
 LAUNCHER="${PROJECT_LOC}/launcher --dumpstats_signal --dumpstats_period ${STATS_PERIOD}"
@@ -116,7 +116,7 @@ read -a CPUS_ARRAY <<< "${FAST_NUMA_NODE_CPUS}"
 
 
 if [ "x${BENCH}" == "x" ]; then
-BENCH="canneal-mt"
+BENCH="graph500-omp"
 fi
 
 sync
